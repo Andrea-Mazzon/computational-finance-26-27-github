@@ -43,11 +43,21 @@ public class LinearCongruentialGenerator {
     }
 
     private void generate() {
-        // initialization! + 1 because the first one is the seed
-        randomNumbers = new long[numberOfPseudoRandomNumbers + 1];
+        
+    	
+    	//before line 49, the Java "value" associated to randomNumbers is "null"
+        randomNumbers = new long[numberOfPseudoRandomNumbers + 1];// initialization! + 1 because the first one is the seed
+        /*
+         * When line 49 is executed, randomNumbers becomes an array of length
+         * numberOfPseudoRandomNumbers + 1, with all values equal to 0
+         */
         randomNumbers[0] = seed; // the first entry is the seed: first number of the sequence
+        //when line 54 is executed, randomNumbers=[seed 0 0 ... 0]
         for (int indexOfInteger = 0; indexOfInteger < numberOfPseudoRandomNumbers; indexOfInteger++) {
-        	randomNumbers[indexOfInteger + 1] = (a * randomNumbers[indexOfInteger] + c) % modulus;        
+        	randomNumbers[indexOfInteger + 1] = (a * randomNumbers[indexOfInteger] + c) % modulus; 
+        	//when line 57 is executed the first time, randomNumbers=[seed x_1 0 ... 0]
+        	//when line 57 is executed the second time, randomNumbers=[seed x_1 x_2 ... 0]
+        	//and so on
         }
     }
     
