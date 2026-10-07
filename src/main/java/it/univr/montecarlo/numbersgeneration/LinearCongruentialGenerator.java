@@ -54,7 +54,11 @@ public class LinearCongruentialGenerator {
         randomNumbers[0] = seed; // the first entry is the seed: first number of the sequence
         //when line 54 is executed, randomNumbers=[seed 0 0 ... 0]
         for (int indexOfInteger = 0; indexOfInteger < numberOfPseudoRandomNumbers; indexOfInteger++) {
-        	randomNumbers[indexOfInteger + 1] = (a * randomNumbers[indexOfInteger] + c) % modulus; 
+        	//first possible fix
+        	randomNumbers[indexOfInteger + 1] = Math.abs((a * randomNumbers[indexOfInteger] + c) % modulus); 
+        	//second possible fix
+        	//randomNumbers[indexOfInteger + 1] = (a * randomNumbers[indexOfInteger] + c) % modulus+modulus; 
+        	
         	//when line 57 is executed the first time, randomNumbers=[seed x_1 0 ... 0]
         	//when line 57 is executed the second time, randomNumbers=[seed x_1 x_2 ... 0]
         	//and so on

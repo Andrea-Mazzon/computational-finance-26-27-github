@@ -13,7 +13,7 @@
 		<dependency>
 			<groupId>net.finmath</groupId>
 			<artifactId>finmath-lib-plot-extensions</artifactId>
-			<version>0.5.8-SNAPSHOT</version>
+			<version>0.5.9-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>
