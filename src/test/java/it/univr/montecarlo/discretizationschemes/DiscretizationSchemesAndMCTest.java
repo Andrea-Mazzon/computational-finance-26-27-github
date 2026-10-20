@@ -9,7 +9,7 @@ import net.finmath.time.TimeDiscretizationFromArray;
 /**
  * In this class we test the discretization schemes that we have implemented. The underlying
  * is a Black-Scholes model. We compute expectation and variance of samples, for repeated
- * tests: we have then the comobination of both discretization error and Monte-Carlo error.
+ * tests: we have then the combination of both discretization error and Monte-Carlo error.
  */
 public class DiscretizationSchemesAndMCTest {
 
@@ -54,6 +54,7 @@ public class DiscretizationSchemesAndMCTest {
 		 */
 		double[] percentageErrorsEulerMaruyama = new double[numberOfTests];
 		double[] percentageErrorsMilstein = new double[numberOfTests];
+		double[] percentageErrorsPredictorCorrector= new double[numberOfTests];
 		double[] percentageErrorsEulerMaruyamaForLogarithm = new double[numberOfTests];
 		
 		/*
@@ -62,6 +63,7 @@ public class DiscretizationSchemesAndMCTest {
 		 */
 		double[] percentageAbsoluteErrorsVarianceEulerMaruyama = new double[numberOfTests];
 		double[] percentageAbsoluteErrorsVarianceMilstein = new double[numberOfTests];
+		double[] percentageAbsoluteErrorsVariancePredictorCorrector= new double[numberOfTests];
 		double[] percentageAbsoluteErrorsVarianceEulerMaruyamaForLogarithm = new double[numberOfTests];
 
 		//analytic expectation for Black-Scholes model
@@ -85,24 +87,33 @@ public class DiscretizationSchemesAndMCTest {
 			AbstractProcessSimulation simulatorMilstein = new MilsteinSchemeForBlackScholes(muDrift, volatility,  initialValue,
 					numberOfSimulatedPaths, seed, times);
 			
+			
 			AbstractProcessSimulation simulatorLogEuler = new LogEulerSchemeForBlackScholes(muDrift, volatility, initialValue,
 					numberOfSimulatedPathsForLogarithm, seed, timesForLogarithm);
 
+			
+			AbstractProcessSimulation simulatorPredictorCorrector = new PredictorCorrectorForBlackScholes(muDrift, volatility, initialValue,
+					numberOfSimulatedPaths, seed, times);
+			
 
 			//We will modify these lines together
-			double expectationEulerMaruyama = 0.0;
-			double expectationMilstein = 0.0;
-			double expectationEulerMaruyamaForLogarithm = 0.0;
+			double expectationEulerMaruyama = simulatorEulerMaruyama.getFinalValue().getAverage();
+			double expectationMilstein = simulatorMilstein.getFinalValue().getAverage();
+			double expectationPredictorCorrector = simulatorPredictorCorrector.getFinalValue().getAverage();
+			double expectationEulerMaruyamaForLogarithm = simulatorLogEuler.getFinalValue().getAverage();
 			
-			double varianceEulerMaruyama = 0.0;
-			double varianceMilstein = 0.0;
-			double varianceEulerMaruyamaForLogarithm = 0.0;
+			double varianceEulerMaruyama = simulatorEulerMaruyama.getFinalValue().getVariance();
+			double varianceMilstein = simulatorMilstein.getFinalValue().getVariance();
+			double variancePredictorCorrector = simulatorPredictorCorrector.getFinalValue().getVariance();
+			double varianceEulerMaruyamaForLogarithm = simulatorLogEuler.getFinalValue().getVariance();
 			
 			
 			percentageErrorsEulerMaruyama[i] =
 					(expectationEulerMaruyama-analyticExpectation)/analyticExpectation*100; 
 			percentageErrorsMilstein[i] = 
 					(expectationMilstein-analyticExpectation)/analyticExpectation*100; 
+			percentageErrorsPredictorCorrector[i] = 
+					(expectationPredictorCorrector-analyticExpectation)/analyticExpectation*100; 
 			percentageErrorsEulerMaruyamaForLogarithm[i] = 
 					(expectationEulerMaruyamaForLogarithm-analyticExpectation)/analyticExpectation*100; 
 			
@@ -111,6 +122,8 @@ public class DiscretizationSchemesAndMCTest {
 					Math.abs(varianceEulerMaruyama-analyticVariance)/analyticVariance*100; 
 			percentageAbsoluteErrorsVarianceMilstein[i] = 
 					Math.abs(varianceMilstein-analyticVariance)/analyticVariance*100; 
+			percentageAbsoluteErrorsVariancePredictorCorrector[i] = 
+					Math.abs(variancePredictorCorrector-analyticVariance)/analyticVariance*100; 
 			percentageAbsoluteErrorsVarianceEulerMaruyamaForLogarithm[i] = 
 					Math.abs(varianceEulerMaruyamaForLogarithm-analyticVariance)/analyticVariance*100; 
 		}
@@ -119,6 +132,8 @@ public class DiscretizationSchemesAndMCTest {
 				+ UsefulMethodsForArrays.getAverage(percentageErrorsEulerMaruyama));
 		System.out.println("Average percentage error Milstein for expected value: "
 					+ UsefulMethodsForArrays.getAverage(percentageErrorsMilstein));
+		System.out.println("Average percentage error Predictor-Corrector for expected value: "
+				+ UsefulMethodsForArrays.getAverage(percentageErrorsPredictorCorrector));
 		System.out.println("Average percentage error Log Euler Maruyama for expected value: "
 						+ UsefulMethodsForArrays.getAverage(percentageErrorsEulerMaruyamaForLogarithm));
 		
@@ -128,6 +143,8 @@ public class DiscretizationSchemesAndMCTest {
 				+ UsefulMethodsForArrays.getAverage(percentageAbsoluteErrorsVarianceEulerMaruyama));
 		System.out.println("Average percentage absolute error Milstein for variance: "
 					+ UsefulMethodsForArrays.getAverage(percentageAbsoluteErrorsVarianceMilstein));
+		System.out.println("Average percentage absolute error Predictor-Corrector for variance: "
+				+ UsefulMethodsForArrays.getAverage(percentageAbsoluteErrorsVariancePredictorCorrector));
 		System.out.println("Average percentage absolute error Log Euler Maruyama for variance: "
 						+ UsefulMethodsForArrays.getAverage(percentageAbsoluteErrorsVarianceEulerMaruyamaForLogarithm));
 	
