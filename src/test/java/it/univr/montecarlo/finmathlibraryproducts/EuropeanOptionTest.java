@@ -42,13 +42,40 @@ public class EuropeanOptionTest {
 		double volatility = 0.2;
 
 		//based on this, we can already compute and print the analytic value
-		double analyticValue = AnalyticFormulas.bachelierOptionValue(initialValue, volatility, maturity, strike, 1.0);
+		double analyticValue = AnalyticFormulas.bachelierOptionValue(initialValue, volatility, maturity, strike,1);
 		System.out.println("The analytic value of the option is " + analyticValue);
 
 		//here we start the construction of the object of type AssetModelMonteCarloSimulationModel
 		
-		//we will do that together
+		//what we simulate
+		ProcessModel ourModel = new BachelierModel(initialValue, riskFreeRate, volatility);
 		
+		//how we simulate it 
+		
+		//simulation parameters
+		int seed = 1897;
+		int numberOfPaths = 100000;
+		int numberOfFactors = 1;//one-dimensional
+		
+		double timeStep = 0.1;
+		int numberOfTimeSteps = (int) (maturity/timeStep);
+		
+		TimeDiscretization  times = new TimeDiscretizationFromArray(0.0, numberOfTimeSteps, timeStep);
+		
+		IndependentIncrements ourDriver =
+				new BrownianMotionFromMersenneRandomNumbers(times,numberOfFactors,numberOfPaths,seed);
+		
+		//we put together what we simulate and how we simulate it
+		AssetModelMonteCarloSimulationModel ourSimulation = new MonteCarloAssetModel(ourModel, ourDriver);
+		
+		
+		//RandomVariable simulatedPayoff = ourOption.getValue(0.0, ourSimulation);
+		//double monteCarloPrice = simulatedPayoff.getAverage();
+		
+		//alternative (used more often)
+		double monteCarloPrice = ourOption.getValue(ourSimulation);
+		
+		System.out.println("Monte Carlo price: " + monteCarloPrice);
 		
 	}
 }
