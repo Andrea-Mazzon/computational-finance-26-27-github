@@ -1,6 +1,8 @@
 package it.univr.montecarlo.variancereduction.importancesampling;
 
 
+import java.util.function.DoubleUnaryOperator;
+
 import org.jblas.util.Random;
 
 import net.finmath.exception.CalculationException;
@@ -10,6 +12,7 @@ import net.finmath.montecarlo.BrownianMotionFromMersenneRandomNumbers;
 import net.finmath.montecarlo.assetderivativevaluation.MonteCarloBlackScholesModel;
 import net.finmath.montecarlo.assetderivativevaluation.products.AbstractAssetMonteCarloProduct;
 import net.finmath.montecarlo.assetderivativevaluation.products.EuropeanOption;
+import net.finmath.stochastic.RandomVariable;
 import net.finmath.time.TimeDiscretization;
 import net.finmath.time.TimeDiscretizationFromArray;
 
@@ -28,7 +31,7 @@ public class ImportanceSamplingMotivation {
 		//parameters for the option
 
 		double maturity = 1.0;
-		double strike = 100;
+		double strike = 170;
 
 		//so we construct the option object
 		AbstractAssetMonteCarloProduct ourOption = new EuropeanOption (maturity, strike);
@@ -46,7 +49,8 @@ public class ImportanceSamplingMotivation {
 		//the seed here changes at every run
 		int seed = Random.nextInt(10000000);
 
-		BrownianMotion ourDriver = new BrownianMotionFromMersenneRandomNumbers(times, 1 /* numberOfFactors */, numberOfPaths, seed);
+		BrownianMotion ourDriver = new BrownianMotionFromMersenneRandomNumbers(
+				times, 1 /* numberOfFactors */, numberOfPaths, seed);
 		
 		//model (i.e., underlying) parameters
 		double initialValue = 100;
@@ -54,11 +58,13 @@ public class ImportanceSamplingMotivation {
 		double volatility = 0.2;
 		
 		//we construct an object of type MonteCarloBlackScholesModel: it represents the simulation of a Black-Scholes process
-		MonteCarloBlackScholesModel blackScholesProcess = new MonteCarloBlackScholesModel(initialValue, riskFreeRate, volatility, ourDriver);
+		MonteCarloBlackScholesModel blackScholesProcess =
+				new MonteCarloBlackScholesModel(initialValue, riskFreeRate, volatility, ourDriver);
 		
 		double monteCarloPrice = ourOption.getValue(blackScholesProcess);
 
-		double analyticPrice = AnalyticFormulas.blackScholesOptionValue(initialValue, riskFreeRate, volatility, maturity, strike);
+		double analyticPrice =
+				AnalyticFormulas.blackScholesOptionValue(initialValue, riskFreeRate, volatility, maturity, strike);
 
 		
 		System.out.println("The Monte Carlo price is: " + monteCarloPrice);
@@ -67,6 +73,18 @@ public class ImportanceSamplingMotivation {
 		double percentageError = (monteCarloPrice-analyticPrice)/analyticPrice*100.0;
 		
 		System.out.println("Percentage error: " + percentageError);
+		
+		//we compute the percentage of trajectories which give a strictly positive payoff
+		
+		RandomVariable payoff = ourOption.getValue(0.0, blackScholesProcess);		
+		
+		DoubleUnaryOperator functionToApply = x -> (x>0 ? 1 : 0);
+		
+		RandomVariable strictlyPositivePayoff = payoff.apply(functionToApply);
+		
+		double percentageOfStrictlyPositivePayoff = strictlyPositivePayoff.getAverage()*100.0;
+		
+		System.out.println("Percentage of strictly positive payoffs: "  + percentageOfStrictlyPositivePayoff);
 		
 	}
 }
